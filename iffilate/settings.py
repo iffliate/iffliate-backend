@@ -70,6 +70,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter', 
         'rest_framework.filters.OrderingFilter'
     ),
+    'EXCEPTION_HANDLER': 'utils.custom_exception_response.custom_exception_handler',
 }
 
 TEMPLATES = [
@@ -159,7 +160,7 @@ CLOUDINARY_STORAGE={
     'API_KEY':config('API_KEY'),
     'API_SECRET':config('API_SECRET')    
 }
-white_list = ['http://localhost:8000/api/v1/auth/users/me']
+white_list = ['http://localhost:8000/api/v1/auth/users/me','https://bucolic-travesseiro-b4154b.netlify.app/']
 DJOSER = {
     'SEND_ACTIVATION_EMAIL': False,
     'ACTIVATION_URL':'/activate/{uid}/{token}',
