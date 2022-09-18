@@ -6,6 +6,8 @@ from .serializer import ProductSerializer, OrderSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .models import Product, Order
 from .permission import UpdateOrDelete
+from utils.custom_response import CustomError, Success_response
+from rest_framework import status
 
 class ProductCreateView(ListCreateAPIView):
     serializer_class = ProductSerializer
@@ -19,7 +21,19 @@ class ProductCreateView(ListCreateAPIView):
         'name',
         'category__name',
     ]  
-    
+
+    def get(self,request):
+        serialized = self.serializer_class(self.queryset,many=True)
+        return Success_response(msg="Success",data=serialized.data,status =status.HTTP_200_OK)
+
+    def post(self,request):
+        serialized = self.serializer_class(data=request.data,context={'request':request})
+        serialized.is_vaild(raise_exception=True)
+        Instance = serialized.save()
+
+        clean_data  = self.serializer_class(Instance,many=False)
+        return Success_response(msg="Created",data=clean_data.data,status =status.HTTP_201_CREATED)
+
 class OrderCreateView(ListCreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
@@ -32,14 +46,20 @@ class OrderCreateView(ListCreateAPIView):
         'orderId',
         'status'
     ]  
-    
+    def get(self,request):
+        serialized = self.serializer_class(self.queryset,many=True)
+        return Success_response(msg="Success",data=serialized.data,status =status.HTTP_200_OK)
+
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+            return Success_response(msg="Created",data=serializer.data,status =status.HTTP_201_CREATED)
+
+        # return Response(, status=)
+        raise CustomError(message=serializer.errors,status_code=status.HTTP_400_BAD_REQUEST)
+
+
 class OrderDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
