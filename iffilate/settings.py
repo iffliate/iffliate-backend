@@ -171,8 +171,8 @@ DJOSER = {
     'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': white_list
 }
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME':timedelta(hours=2),
-    'REFRESH_TOKEN_LIFETIME':timedelta(hours=2),
+    'ACCESS_TOKEN_LIFETIME':timedelta(hours=24),
+    'REFRESH_TOKEN_LIFETIME':timedelta(hours=24),
     'ROTATE_REFRESH_TOKENS':False,
     'BLACKLIST_AFTER_ROTATION':False,
     'ALGORITH':'HS256',
@@ -200,3 +200,39 @@ SIMPLE_JWT = {
 }
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_CLIENTID')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('SOCIAL_AUTH_SECRET')
+
+
+# corsheader related info
+
+CORS_ALLOWED_ORIGINS = [
+# frontend
+"http://localhost:3000",# for nextjs localhost
+'https://bucolic-travesseiro-b4154b.netlify.app',
+'http://bucolic-travesseiro-b4154b.netlify.app',
+# backend
+"http://localhost:8000",
+'https://bucolic-travesseiro-b4154b.netlify.app'
+]
+
+CORS_ALLOW_METHODS = [
+'DELETE',
+'GET',
+'OPTIONS',
+'PATCH',
+'POST',
+'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+'accept',
+'accept-encoding',
+'authorization',
+'content-type',
+'dnt',
+'origin',
+'user-agent',
+'x-csrftoken',
+'x-requested-with',
+]
+
+CSRF_TRUSTED_ORIGINS =CORS_ALLOWED_ORIGINS
