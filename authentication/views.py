@@ -2,12 +2,15 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from .serializer import ShopSerializer
+from rest_framework.parsers import  FormParser
+from utils.custom_parsers import NestedMultipartParser
 from rest_framework.permissions import IsAuthenticated
 from .models import Shop
 
 class ShopCreate(ListCreateAPIView):
     serializer_class = ShopSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = (NestedMultipartParser,FormParser,)
     queryset = Shop.objects.all()  
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
