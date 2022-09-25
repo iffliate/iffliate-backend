@@ -1,9 +1,14 @@
 from wsgiref import validate
-from .models import Order, OrderItem, Product, Images, Sizes, Category
+
+from utils.custom_response import CustomError
+from .models import (Order, OrderItem, Product
+# , Images
+, Sizes, Category)
+from authentication.models import Shop
 from rest_framework import serializers
 from .utils import getUniqueId
 from django.template.defaultfilters import slugify
-
+from rest_framework import status
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
@@ -47,18 +52,18 @@ class OrderSerializer(serializers.ModelSerializer):
             OrderItem.objects.create(order=order, **item_data)
         return order
     
-class ImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Images
-        fields = [
-            'image_one',
-            'image_two',
-            'image_three', 
-            'image_four'
-        ]
+# class ImageSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Images
+#         fields = [
+#             'image_one',
+#             'image_two',
+#             'image_three', 
+#             'image_four'
+#         ]
 
 class ProductSerializer(serializers.ModelSerializer):
-    images = ImageSerializer(many=True)
+    # images = ImageSerializer(many=True)
     class Meta:
         model = Product
         fields = [
@@ -69,14 +74,23 @@ class ProductSerializer(serializers.ModelSerializer):
             'slash_percentage',
             'actual_price',
             'shop',
-            'images',
-            'out_of_stock'
+            'category',
+            # 'images',
+            'out_of_stock',
+            'image_one',
+            'image_two',
+            'image_three',
+            'image_four',
+
             
         ]
-        read_only_fields = ["slash_percentage", "slug"]
+        read_only_fields = ["slash_percentage", "slug",]
     
     def create(self, validated_data):
-        images = validated_data.pop('images')
+        # images = validated_data.pop('images')
+        request = self.context.get('request')
+        if not self.check_if_shop_owner(request,validated_data):
+            raise CustomError({'shop':'You not the shop owner'},status_code=status.HTTP_401_UNAUTHORIZED)
         slug = slugify(validated_data["name"])
         if validated_data["slashed_price"]:
             slashed_percentage = ((validated_data["actual_price"] - validated_data["slashed_price"])/validated_data["actual_price"]) * 100
@@ -85,6 +99,11 @@ class ProductSerializer(serializers.ModelSerializer):
             slash_percentage = 0
             validated_data["slashed_price"] = validated_data["actual_price"]
         product = Product.objects.create(slug=slug, slash_percentage=slash_percentage, **validated_data)
-        for image in images:
-            Images.objects.create(product=product, **image) 
+        # for image in images:
+        #     Images.objects.create(product=product, **image) 
         return product
+    
+    def check_if_shop_owner(self,request,validated_data):
+        current_shop =validated_data.get('shop',)
+        
+        return request.user.id == current_shop.user.id

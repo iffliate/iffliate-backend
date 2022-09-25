@@ -5,14 +5,18 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from .serializer import ProductSerializer, OrderSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .models import Product, Order
-from .permission import UpdateOrDelete
+from .permission import UpdateOrDelete,IsShopOwner
 from utils.custom_response import CustomError, Success_response
 from rest_framework import status
+from utils.custom_parsers import NestedMultipartParser
+from rest_framework.parsers import  FormParser
+
 
 class ProductCreateView(ListCreateAPIView):
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly,IsShopOwner]
     queryset = Product.objects.filter(out_of_stock=False)
+    parser_classes = (NestedMultipartParser,FormParser,)
     search_fields = [
         'name',
         'category__name'
@@ -24,15 +28,15 @@ class ProductCreateView(ListCreateAPIView):
 
     def get(self,request):
         serialized = self.serializer_class(self.queryset,many=True)
-        return Success_response(msg="Success",data=serialized.data,status =status.HTTP_200_OK)
+        return Success_response(msg="Success",data=serialized.data,status_code =status.HTTP_200_OK)
 
     def post(self,request):
         serialized = self.serializer_class(data=request.data,context={'request':request})
-        serialized.is_vaild(raise_exception=True)
+        serialized.is_valid(raise_exception=True)
         Instance = serialized.save()
 
         clean_data  = self.serializer_class(Instance,many=False)
-        return Success_response(msg="Created",data=clean_data.data,status =status.HTTP_201_CREATED)
+        return Success_response(msg="Created",data=clean_data.data,status_code=status.HTTP_201_CREATED)
 
 class OrderCreateView(ListCreateAPIView):
     serializer_class = OrderSerializer

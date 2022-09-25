@@ -24,6 +24,11 @@ class Product(models.Model):
     slash_percentage = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now = True)
+
+    image_one = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+    image_two = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+    image_three = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+    image_four = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
     
     def __str__(self):
         return self.name
@@ -42,18 +47,18 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now = True)
 
-class Images(models.Model):
-    class Meta:
-        verbose_name = 'Image'
-        verbose_name_plural='Images'
-    product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
-    image_one = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
-    image_two = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
-    image_three = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
-    image_four = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+# class Images(models.Model):
+#     class Meta:
+#         verbose_name = 'Image'
+#         verbose_name_plural='Images'
+#     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
+#     image_one = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+#     image_two = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+#     image_three = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+#     image_four = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
     
-    def __str__(self):
-        return self.product.name
+#     def __str__(self):
+#         return self.product.name
     
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
