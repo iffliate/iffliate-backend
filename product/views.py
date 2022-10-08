@@ -15,7 +15,7 @@ from rest_framework.parsers import  FormParser
 class ProductCreateView(ListCreateAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly,IsShopOwner]
-    queryset = Product.objects.filter(out_of_stock=False)
+    queryset = Product.objects.all()
     parser_classes = (NestedMultipartParser,FormParser,)
     search_fields = [
         'name',
@@ -27,7 +27,7 @@ class ProductCreateView(ListCreateAPIView):
     ]  
 
     def get(self,request):
-        serialized = self.serializer_class(self.queryset,many=True)
+        serialized = self.serializer_class(self.queryset.filter(out_of_stock=False),many=True)
         return Success_response(msg="Success",data=serialized.data,status_code =status.HTTP_200_OK)
 
     def post(self,request):
