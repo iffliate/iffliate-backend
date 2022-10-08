@@ -10,24 +10,26 @@ from utils.custom_response import CustomError, Success_response
 from rest_framework import status
 from utils.custom_parsers import NestedMultipartParser
 from rest_framework.parsers import  FormParser
-
+from . import filter as custom_filters
 
 class ProductCreateView(ListCreateAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly,IsShopOwner]
     queryset = Product.objects.all()
     parser_classes = (NestedMultipartParser,FormParser,)
-    search_fields = [
-        'name',
-        'category__name'
-    ]
-    filterset_fields = [
-        'name',
-        'category__name',
-    ]  
+    filterset_class = custom_filters.ProductFilter
+    
+    # search_fields = [
+    #     'name',
+    #     'category__name',''
+    # ]
+    # filterset_fields = [
+    #     'name',
+    #     'category__name',
+    # ]  
 
     def get(self,request):
-        serialized = self.serializer_class(self.queryset.filter(out_of_stock=False),many=True)
+        serialized = self.serializer_class(self.filter_queryset(self.queryset),many=True)
         return Success_response(msg="Success",data=serialized.data,status_code =status.HTTP_200_OK)
 
     def post(self,request):
