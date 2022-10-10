@@ -53,14 +53,14 @@ class OrderCreateView(ListCreateAPIView):
         'status'
     ]  
     def get(self,request):
-        serialized = self.serializer_class(self.queryset,many=True)
-        return Success_response(msg="Success",data=serialized.data,status =status.HTTP_200_OK)
+        # serialized = self.serializer_class(self.queryset,many=True)
+        return Success_response(msg="Success",data=[],status_code =status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data,context={'user':request.user})
         if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user)
-            return Success_response(msg="Created",data=serializer.data,status =status.HTTP_201_CREATED)
+            return Success_response(msg="Created",data=[],status_code =status.HTTP_201_CREATED)
 
         # return Response(, status=)
         raise CustomError(message=serializer.errors,status_code=status.HTTP_400_BAD_REQUEST)

@@ -1,3 +1,4 @@
+from email.policy import default
 from unittest.util import _MAX_LENGTH
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
@@ -55,6 +56,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f'{self.first_name} {self.last_name}'
     
 class Shop(models.Model):
+        
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     slug = models.SlugField(null=True)
@@ -76,6 +78,8 @@ class Shop(models.Model):
     street_address = models.CharField(max_length=300)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now = True, null=True, blank=True)
+    "each shop has their wallet "
+    wallet = models.DecimalField(max_digits=10, decimal_places=2,default=0.00)
     
     def __str__(self):
             return self.name

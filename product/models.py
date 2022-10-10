@@ -1,3 +1,4 @@
+from email.policy import default
 from unicodedata import category
 from django.db import models
 from authentication.models import User, Shop
@@ -34,18 +35,36 @@ class Product(models.Model):
         return self.name
     
 class Order(models.Model):
-    status_choices = (
-        ('Order Processing', 'Order Processing',),
-        ('Ready to Dispatch', 'Ready to Dispatch',),
-        ('Order Dispatched', 'Order Dispatched',),
-        ('Delivered', 'Delivered',),
-    )
-    orderId = models.CharField(max_length=10, primary_key=True)
+
+    # orderId = models.CharField(max_length=10, primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    total_amount = models.IntegerField(null=True, blank=True)
-    status = models.CharField(max_length=50, choices=status_choices, default='Order Processing')
+    # total_amount = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now = True)
+    is_paid = models.BooleanField(default=False)
+    paystack = models.TextField(default='',)
+
+    def __str__(self) -> str:
+        return f'Order number -> {self.id}'
+
+
+    @property
+    def total_amount(self):
+        '''
+        this propety is like a column in data base but it runs some calculation to get it value
+        
+        i choose this approach because product prices can change 
+        '''
+        items =OrderItem.objects.filter(order=self.id)
+        return sum(map(self._getTotalAmout,items))
+
+    def _getTotalAmout(self,item):
+        'for each item we get the product and return the amount'
+        try:
+          
+            return item.product.actual_price * item.quantity
+        except:return 0 
+# class Shop
 
 # class Images(models.Model):
 #     class Meta:
@@ -63,8 +82,18 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+    quantity = models.IntegerField(default=0,null=True)
     size = models.CharField(max_length=20, null=True, blank=True)
+    status_choices = (
+        ('Order Processing', 'Order Processing',),
+        ('Ready to Dispatch', 'Ready to Dispatch',),
+        ('Order Dispatched', 'Order Dispatched',),
+        ('Delivered', 'Delivered',),
+    )
+    "only vendor owners can edit the status"
+    status = models.CharField(max_length=50, choices=status_choices, default='Order Processing')
+    "this will just be for easy refrence"
+    shop = models.ForeignKey(Shop,on_delete=models.SET_NULL,null=True)  
     
 class Sizes(models.Model):
     class Meta:
