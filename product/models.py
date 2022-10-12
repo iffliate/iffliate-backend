@@ -91,6 +91,8 @@ class OrderItem(models.Model):
 class OrderHistory(models.Model):
     'this stores the orders that the user has bought with money successfully'
     # the  foreignKey is so the shop and user can access the info
+    created_at = models.DateTimeField(auto_now_add=True)
+    
     shop = models.ForeignKey(Shop,on_delete=models.SET_NULL,null=True)  
     user = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
     # buyer info is for shop owner if the user has been deleted they will still be able to access the buyer info
@@ -104,7 +106,8 @@ class OrderHistory(models.Model):
     quantity = models.IntegerField(default=0,null=True)
     product_name = models.CharField(max_length=1000)
     description = models.CharField(max_length=300, blank=True)
-
+    iffiliate_earning =  models.DecimalField(max_digits=10, decimal_places=2,default=0.00)
+    shop_earning =  models.DecimalField(max_digits=10, decimal_places=2,default=0.00)
     "only vendor owners can edit the status"
     status_choices = (
         ('order_processing', 'order_processing',),
