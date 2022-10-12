@@ -84,16 +84,39 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0,null=True)
     size = models.CharField(max_length=20, null=True, blank=True)
-    status_choices = (
-        ('Order Processing', 'Order Processing',),
-        ('Ready to Dispatch', 'Ready to Dispatch',),
-        ('Order Dispatched', 'Order Dispatched',),
-        ('Delivered', 'Delivered',),
-    )
-    "only vendor owners can edit the status"
-    status = models.CharField(max_length=50, choices=status_choices, default='Order Processing')
+
     "this will just be for easy refrence"
     shop = models.ForeignKey(Shop,on_delete=models.SET_NULL,null=True)  
+
+class OrderHistory(models.Model):
+    'this stores the orders that the user has bought with money successfully'
+    # the  foreignKey is so the shop and user can access the info
+    shop = models.ForeignKey(Shop,on_delete=models.SET_NULL,null=True)  
+    user = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
+    # buyer info is for shop owner if the user has been deleted they will still be able to access the buyer info
+    buyer_first_name = models.CharField(max_length=255,default='')
+    buyer_last_name = models.CharField(max_length=255,default='')
+    buyer_email = models.EmailField(max_length=255,default='')
+    buyer_phone = models.CharField(max_length=15, blank=True)
+    buyer_shipping_address =models.TextField(default='nil')
+    amount = models.DecimalField(max_digits=10, decimal_places=2,default=0.00)
+    paystack = models.TextField(default='')
+    quantity = models.IntegerField(default=0,null=True)
+    product_name = models.CharField(max_length=1000)
+    description = models.CharField(max_length=300, blank=True)
+
+    "only vendor owners can edit the status"
+    status_choices = (
+        ('order_processing', 'order_processing',),
+        ('ready_to_dispatch', 'ready_to_dispatch',),
+        ('order_dispatched', 'order_dispatched',),
+        ('delivered', 'delivered',),
+    )
+    status = models.CharField(max_length=50, choices=status_choices, default='order_processing')
+
+    def __str__(self):
+        return f'{self.buyer_email} buys {self.product_name} for {self.amount}'
+    
     
 class Sizes(models.Model):
     class Meta:
@@ -102,3 +125,4 @@ class Sizes(models.Model):
     name = models.CharField(max_length=20)
     def __str__(self):
         return f'{self.name}'
+

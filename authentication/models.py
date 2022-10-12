@@ -35,14 +35,15 @@ class UserManager(BaseUserManager):
         return user
     
 class User(AbstractBaseUser, PermissionsMixin):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255,default='')
+    last_name = models.CharField(max_length=255,default='')
     email = models.EmailField(max_length=255, unique=True)
     phone = models.CharField(max_length=15, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    shipping_address =models.TextField(default='nil')
     billing_address = models.CharField(max_length=300, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now = True, null=True, blank=True)
@@ -56,7 +57,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f'{self.first_name} {self.last_name}'
     
 class Shop(models.Model):
-        
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     slug = models.SlugField(null=True)

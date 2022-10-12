@@ -2,7 +2,7 @@ from pathlib import Path
 from telnetlib import AUTHENTICATION
 from decouple import config
 from datetime import timedelta 
-import dj_database_url
+import dj_database_url,os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -18,7 +18,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["*",'https://0729-102-89-43-39.eu.ngrok.io']
 
 
 # Application definition
@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     'django_filters',
-    'product'
+    'product',
+    'payment'
    
 ]
 
@@ -237,3 +238,8 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CSRF_TRUSTED_ORIGINS =CORS_ALLOWED_ORIGINS
+
+
+
+PAYSTACK_SECRET=os.environ['PAYSTACK_SECRET']
+PAYSTACK_PUBLICKEY=os.environ['PAYSTACK_PUBLICKEY']

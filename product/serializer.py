@@ -1,3 +1,4 @@
+from re import L
 from wsgiref import validate
 
 from utils.custom_response import CustomError
@@ -47,7 +48,7 @@ class OrderSerializer(serializers.Serializer):
         items = validated_data.get('items')
         print({'items':items})
         user = self.context.get('user')
-        order,_ = product_app_models.Order.objects.get_or_create(user=user)
+        order,_ = product_app_models.Order.objects.get_or_create(user=user,is_paid=False)
         print(order)
 
         order.save()    
@@ -65,9 +66,31 @@ class OrderSerializer(serializers.Serializer):
         return order
 
 
-class OrderCleanerSerializer:
+class UserOrderCleanerSerializer(serializers.ModelSerializer):
     'helps send clean data to the fron end'
-    pass
+    items  = serializers.SerializerMethodField()
+    user  = serializers.SerializerMethodField()
+
+    def get_items(self,order):
+        return product_app_models.OrderItem.objects.filter(order=order.id).values(
+            'order','product','product__name','quantity','shop','size'
+        )
+    def get_user(self,order):
+        user = auth_models.User.objects.get(id=order.user.id)
+        return {
+            'email':user.email,
+            'phone':user.phone,
+            'first_name':user.first_name,
+            'last_name':user.last_name
+        }
+    class Meta:
+        model = product_app_models.Order
+        fields  = [
+            'id',
+            'user',
+            'created_at',
+            'is_paid','total_amount','items'
+        ]
 
 class ProductSerializer(serializers.ModelSerializer):
     # images = ImageSerializer(many=True)
