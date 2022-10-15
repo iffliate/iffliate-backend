@@ -2,7 +2,7 @@ import re
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
-from .serializer import ProductSerializer, OrderSerializer
+from .serializer import ProductSerializer, OrderSerializer,UserOrderCleanerSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .models import Product, Order
 from .permission import UpdateOrDelete,IsShopOwner
@@ -43,7 +43,7 @@ class ProductCreateView(ListCreateAPIView):
 class OrderCreateView(ListCreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
-    queryset = Order.objects.all()
+    # queryset = Order.objects.all()
     search_fields = [
         'orderId',
         'status'
@@ -53,14 +53,16 @@ class OrderCreateView(ListCreateAPIView):
         'status'
     ]  
     def get(self,request):
-        serialized = self.serializer_class(self.queryset,many=True)
-        return Success_response(msg="Success",data=serialized.data,status =status.HTTP_200_OK)
+        queryset =Order.objects.all()
+        serialized = UserOrderCleanerSerializer(queryset,many=True)
+        return Success_response(msg="Success",data=serialized.data,status_code =status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data,context={'user':request.user})
         if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user)
-            return Success_response(msg="Created",data=serializer.data,status =status.HTTP_201_CREATED)
+            order = serializer.save(user=request.user)
+            clean_data = UserOrderCleanerSerializer(order,many=False)
+            return Success_response(msg="Created",data=clean_data.data,status_code =status.HTTP_201_CREATED)
 
         # return Response(, status=)
         raise CustomError(message=serializer.errors,status_code=status.HTTP_400_BAD_REQUEST)

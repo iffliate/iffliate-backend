@@ -1,72 +1,103 @@
+from re import L
 from wsgiref import validate
 
 from utils.custom_response import CustomError
-from .models import (Order, OrderItem, Product
-# , Images
-, Sizes, Category)
+from . import models as product_app_models
+from authentication import models as auth_models
 from authentication.models import Shop
 from rest_framework import serializers
 from .utils import getUniqueId
 from django.template.defaultfilters import slugify
 from rest_framework import status
-class OrderItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderItem
-        fields=[
-            'product', 
-            'quantity',
-            'size'
-        ]
+class OrderItemsSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField()
+    # shop_id = serializers.IntegerField()
+
+
 
 
         
-class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True)
-    class Meta:
-        model = Order
-        fields = [
-            'orderId',
-            'items',
-            'total_amount',
-            'status'
-        ]
-        read_only_fields =['orderId', 'total_amount']
-    
+"""THe plan is once the click on checkout on check out page
+checkout model is created after computation we send back a paystack key after payment we use the webhook to see 
+if the person paid or not
+    if the person pay then we do calculation to credit each vendor thier money they earn 
+    after Order to is paid and we close the cart
+"""
+class OrderSerializer(serializers.Serializer):
+    items = OrderItemsSerializer(many=True)
+
+    def validate(self, attrs):
+        return super().validate(attrs)
+
     def create(self, validated_data):
-        print(validated_data)
-        user = validated_data["user"]
-        if not user.phone and not user.billing_address:
-            raise serializers.ValidationError("User must update phone number and billing address")
-        items_data = validated_data.pop('items')
-        total_amount = 0
-        for item_data in items_data:
-            product = Product.objects.get(name=item_data["product"])
-            if item_data["quantity"]:
-                amount = product.slashed_price * item_data["quantity"]
-            else:
-                amount = product.slashed_price
-            total_amount = total_amount + amount
-        orderId = getUniqueId()
-        order = Order.objects.create(orderId=orderId, total_amount=total_amount, **validated_data)
-        for item_data in items_data:
-            OrderItem.objects.create(order=order, **item_data)
+        """
+
+        create a order(user) - using get_or_create
+        total_amount =  a function to get total data
+
+        for each item in order_items
+            OrderItem(
+                order = orderInstance,
+                product= product instnce,
+                quantity = quantity,
+                shop = shop instance
+            )
+        """
+
+        items = validated_data.get('items')
+        print({'items':items})
+        user = self.context.get('user')
+        order,_ = product_app_models.Order.objects.get_or_create(user=user,is_paid=False)
+        print(order)
+
+        order.save()    
+        for item in items:
+            product = product_app_models.Product.objects.get(id=item.get('product_id'))
+            # shop = auth_models.Shop.objects.get(id=product)
+            'to avoid duplicate order item we just overide quantity'
+            order_item,_ = product_app_models.OrderItem.objects.get_or_create(
+                order=order,
+                product=product,
+            )
+            order_item.quantity= item.get('quantity')
+            order_item.shop=product.shop
+            order_item.save()
         return order
-    
-# class ImageSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Images
-#         fields = [
-#             'image_one',
-#             'image_two',
-#             'image_three', 
-#             'image_four'
-#         ]
+
+
+class UserOrderCleanerSerializer(serializers.ModelSerializer):
+    'helps send clean data to the fron end'
+    items  = serializers.SerializerMethodField()
+    user  = serializers.SerializerMethodField()
+
+    def get_items(self,order):
+        return product_app_models.OrderItem.objects.filter(order=order.id).values(
+            'order','product','product__name','quantity','shop','size'
+        )
+    def get_user(self,order):
+        user = auth_models.User.objects.get(id=order.user.id)
+        return {
+            'email':user.email,
+            'phone':user.phone,
+            'first_name':user.first_name,
+            'last_name':user.last_name
+        }
+    class Meta:
+        model = product_app_models.Order
+        fields  = [
+            'id',
+            'user',
+            'created_at',
+            'is_paid','total_amount','items'
+        ]
 
 class ProductSerializer(serializers.ModelSerializer):
     # images = ImageSerializer(many=True)
     class Meta:
-        model = Product
+        model = product_app_models.Product
         fields = [
+            'id',
             'name',
             'slug',
             'description',
@@ -98,7 +129,7 @@ class ProductSerializer(serializers.ModelSerializer):
         else:
             slash_percentage = 0
             validated_data["slashed_price"] = validated_data["actual_price"]
-        product = Product.objects.create(slug=slug, slash_percentage=slash_percentage, **validated_data)
+        product = product_app_models.Product.objects.create(slug=slug, slash_percentage=slash_percentage, **validated_data)
         # for image in images:
         #     Images.objects.create(product=product, **image) 
         return product

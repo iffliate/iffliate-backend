@@ -1,3 +1,4 @@
+from email.policy import default
 from unittest.util import _MAX_LENGTH
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
@@ -34,14 +35,15 @@ class UserManager(BaseUserManager):
         return user
     
 class User(AbstractBaseUser, PermissionsMixin):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255,default='')
+    last_name = models.CharField(max_length=255,default='')
     email = models.EmailField(max_length=255, unique=True)
     phone = models.CharField(max_length=15, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    shipping_address =models.TextField(default='nil')
     billing_address = models.CharField(max_length=300, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now = True, null=True, blank=True)
@@ -76,6 +78,8 @@ class Shop(models.Model):
     street_address = models.CharField(max_length=300)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now = True, null=True, blank=True)
+    "each shop has their wallet "
+    wallet = models.DecimalField(max_digits=10, decimal_places=2,default=0.00)
     
     def __str__(self):
             return self.name
