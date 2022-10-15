@@ -47,13 +47,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     
 ]
 
@@ -243,3 +243,7 @@ CSRF_TRUSTED_ORIGINS =CORS_ALLOWED_ORIGINS
 
 PAYSTACK_SECRET=os.environ['PAYSTACK_SECRET']
 PAYSTACK_PUBLICKEY=os.environ['PAYSTACK_PUBLICKEY']
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# url https://stackoverflow.com/questions/61234135/whitenoise-storage-missingfileerror-the-file-ecommerce-fonts-icofont-eot
+WHITENOISE_MANIFEST_STRICT =False

@@ -9,7 +9,7 @@ cryptography==38.0.1
 defusedxml==0.7.1
 dj-database-url==1.0.0
 dj-rest-auth==2.2.5
-Django==4.1.1
+Django==4.0
 django-allauth==0.51.0
 django-cloudinary-storage==0.3.0
 django-cors-headers==3.13.0
