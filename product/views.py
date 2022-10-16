@@ -54,14 +54,14 @@ class OrderCreateView(ListCreateAPIView):
     ]  
     def get(self,request):
         queryset =Order.objects.all()
-        serialized = UserOrderCleanerSerializer(queryset,many=True)
+        serialized = UserOrderCleanerSerializer(queryset,many=True,context={'request':request})
         return Success_response(msg="Success",data=serialized.data,status_code =status.HTTP_200_OK)
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data,context={'user':request.user})
         if serializer.is_valid(raise_exception=True):
             order = serializer.save(user=request.user)
-            clean_data = UserOrderCleanerSerializer(order,many=False)
+            clean_data = UserOrderCleanerSerializer(order,many=False,context={'request':request})
             return Success_response(msg="Created",data=clean_data.data,status_code =status.HTTP_201_CREATED)
 
         # return Response(, status=)

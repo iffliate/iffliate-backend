@@ -65,16 +65,59 @@ class OrderSerializer(serializers.Serializer):
             order_item.save()
         return order
 
+class OrderItemCleaner(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField()
+
+    def get_product(self,item):
+        def create_img_link(img_col):
+            try:
+                return img_col.url
+            except:return None
+        product =item.product
+        data = {
+            'id':product.id,
+            'shop':product.shop.id,
+            'category':product.category.id,
+            'out_of_stock':product.out_of_stock,
+            'name':product.name,
+            'description':product.description,
+            'slashed_price':product.slashed_price,
+            'actual_price':product.actual_price,
+            'slash_percentage':product.slash_percentage,
+            'slash_percentage':product.slash_percentage,
+            'image_one':create_img_link(product.image_one),
+            'image_two':create_img_link(product.image_two),
+            'image_three':create_img_link(product.image_three),
+            'image_four':create_img_link(product.image_four),
+        }
+
+
+        return data
+
+    class Meta:
+        model  =product_app_models.OrderItem
+        fields = [
+            'id',
+            'quantity',
+            'size',
+            'product'
+        ]
 
 class UserOrderCleanerSerializer(serializers.ModelSerializer):
     'helps send clean data to the fron end'
     items  = serializers.SerializerMethodField()
     user  = serializers.SerializerMethodField()
-
+    
+    
     def get_items(self,order):
-        return product_app_models.OrderItem.objects.filter(order=order.id).values(
-            'order','product','product__name','quantity','shop','size'
-        )
+        # return product_app_models.OrderItem.objects.filter(order=order.id).values(
+        #   'id','product','product__name','quantity','shop','size',
+        #               'product__image_two',
+
+        # )
+        data = product_app_models.OrderItem.objects.filter(order=order.id)
+        clean = OrderItemCleaner(data,many=True,context={'request':self.context.get('request')})
+        return clean.data
     def get_user(self,order):
         user = auth_models.User.objects.get(id=order.user.id)
         return {
