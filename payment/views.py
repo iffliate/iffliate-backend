@@ -111,6 +111,11 @@ def payment_webhook(request,pk=None):
                     description=eachitem.product.description,
                     iffiliate_earning= get_amount_by_percent(25,eachitem.product.actual_price*eachitem.quantity),
                     shop_earning=shop_earnings,
+
+                    image_one=eachitem.image_one,
+                    image_two=eachitem.image_two,
+                    image_three=eachitem.image_three,
+                    image_four=eachitem.image_three
                 )
 
 
@@ -125,10 +130,10 @@ def payment_webhook(request,pk=None):
 
 class InitOrderTran(APIView):
     authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
 
     def post(self, request,order_id=None):
-        print({order_id})
         if not product_app_models.Order.objects.filter(id=order_id,).exists():
             raise CustomError(message='Order does not exists',status_code=status.HTTP_400_BAD_REQUEST)
 

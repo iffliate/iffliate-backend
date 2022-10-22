@@ -117,6 +117,11 @@ class OrderHistory(models.Model):
     )
     status = models.CharField(max_length=50, choices=status_choices, default='order_processing')
 
+    image_one = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+    image_two = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+    image_three = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+    image_four = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
+    
     def __str__(self):
         return f'{self.buyer_email} buys {self.product_name} for {self.amount}'
     

@@ -1,10 +1,11 @@
-import re
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status,viewsets,mixins
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
-from .serializer import ProductSerializer, OrderSerializer,UserOrderCleanerSerializer
+from .serializer import (ProductSerializer, OrderSerializer,UserOrderCleanerSerializer,
+OrderHistoryCleanSerializer,OrderHistoryShopManageSerializer)
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from .models import Product, Order
+from .models import Product, Order,OrderHistory
 from .permission import UpdateOrDelete,IsShopOwner
 from utils.custom_response import CustomError, Success_response
 from rest_framework import status
@@ -43,7 +44,8 @@ class ProductCreateView(ListCreateAPIView):
 class OrderCreateView(ListCreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
-    # queryset = Order.objects.all()
+    queryset = Order.objects.all()
+    filterset_class = custom_filters.ProductFilter
     search_fields = [
         'orderId',
         'status'
@@ -54,7 +56,7 @@ class OrderCreateView(ListCreateAPIView):
     ]  
     def get(self,request):
         queryset =Order.objects.all()
-        serialized = UserOrderCleanerSerializer(queryset,many=True,context={'request':request})
+        serialized = UserOrderCleanerSerializer(self.filter_queryset(queryset),many=True,context={'request':request})
         return Success_response(msg="Success",data=serialized.data,status_code =status.HTTP_200_OK)
 
     def post(self, request):
@@ -83,3 +85,67 @@ class ProductDetailView(RetrieveUpdateDestroyAPIView):
     lookup_field = 'slug'
     queryset = Product.objects.filter(out_of_stock = False)
             
+
+
+
+
+class UserOrderManagemnt(mixins.ListModelMixin,mixins.RetrieveModelMixin,viewsets.GenericViewSet):
+    queryset  = OrderHistory.objects.all()
+    filterset_class = custom_filters.OrderHistoryFiter
+    serializer_class = OrderHistoryCleanSerializer
+    permission_classes = [IsAuthenticated]
+
+
+    @action(detail=False,methods=['get'])
+    def get_all_paystack_keys(self,request,pk=None):
+        'we getting all the keys that will be represented as payment id'
+
+        paystack_keys = OrderHistory.objects.filter(user=request.user.id).values('paystack').distinct()
+
+        return Success_response(msg="Success",data=paystack_keys,status_code =status.HTTP_200_OK)
+
+
+    def retrieve(self, request, *args, **kwargs):
+        paystack_key = kwargs.get('pk',None)
+        if paystack_key is None:raise CustomError(message='look up field must not be None') 
+        
+        get_orders_info = self.filter_queryset(self.queryset.filter(paystack=paystack_key))
+        clean_data = self.serializer_class(get_orders_info,many=True)
+
+        return Success_response(msg="Success",data=clean_data.data,status_code =status.HTTP_200_OK)
+
+class ShopOrderManagement(mixins.ListModelMixin,mixins.UpdateModelMixin,mixins.RetrieveModelMixin,viewsets.GenericViewSet):
+    queryset  = OrderHistory.objects.all()
+    filterset_class = custom_filters.OrderHistoryFiter
+    serializer_class = OrderHistoryCleanSerializer
+    permission_classes = [IsAuthenticated , IsShopOwner]
+
+
+    @action(detail=True,methods=['get'])
+    def get_all_paystack_keys(self,request,pk=None):
+        'we getting all the keys that will be represented as payment id for the shop'
+        paystack_keys = OrderHistory.objects.filter(shop__user=pk).values('paystack').distinct()
+        return Success_response(msg="Success",data=paystack_keys,status_code =status.HTTP_200_OK)
+
+
+
+    def retrieve(self, request, *args, **kwargs):
+        'get all product that the users has bought from ur store'
+        paystack_key = kwargs.get('pk',None)
+        if paystack_key is None:raise CustomError(message='look up field must not be None') 
+        
+        get_orders_info = self.filter_queryset(self.queryset.filter(paystack=paystack_key))
+        clean_data = self.serializer_class(get_orders_info,many=True)
+
+        return Success_response(msg="Success",data=clean_data.data,status_code =status.HTTP_200_OK)
+
+    
+
+    def create(self, request, *args, **kwargs):
+        serilized = OrderHistoryShopManageSerializer(data=request.data)
+        serilized.is_valid(raise_exception=True)
+        data = serilized.save()
+
+        clean_data = self.serializer_class(data,many=True)
+         
+        return Success_response(msg='Updated',data=clean_data.data,status_code=status.HTTP_200_OK)

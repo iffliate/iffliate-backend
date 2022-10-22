@@ -1,6 +1,5 @@
 from re import L
 from wsgiref import validate
-
 from utils.custom_response import CustomError
 from . import models as product_app_models
 from authentication import models as auth_models
@@ -181,3 +180,28 @@ class ProductSerializer(serializers.ModelSerializer):
         current_shop =validated_data.get('shop',)
         
         return request.user.id == current_shop.user.id
+
+
+
+class OrderHistoryCleanSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = product_app_models.OrderHistory
+        fields = '__all__'
+
+
+class OrderHistoryShopManageSerializer(serializers.Serializer):
+    paystack =serializers.CharField()
+    status = serializers.CharField()
+
+    def validate(self, attrs):
+        if not product_app_models.OrderHistory.objects.filter(paystack = attrs.get('paystack')).exists():
+            raise CustomError({'error':'order historys does not exists'})
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        paystack = validated_data.get('paystack')
+        status = validated_data.get('status')
+        product_app_models.OrderHistory.objects.filter(paystack=paystack).update(status=status)
+
+        return product_app_models.OrderHistory.objects.filter(paystack=paystack)
