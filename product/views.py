@@ -45,7 +45,7 @@ class OrderCreateView(ListCreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
     queryset = Order.objects.all()
-    filterset_class = custom_filters.ProductFilter
+    filterset_class = custom_filters.OrderFilter
     search_fields = [
         'orderId',
         'status'
