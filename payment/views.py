@@ -117,9 +117,6 @@ def payment_webhook(request,pk=None):
                     # image_one=eachitem.image_one,
                    
                 )
-                picture_copy  =ContentFile(eachitem.image_one.read())
-                new_picture_name = eachitem.image_one.name.split('/')[-1]
-                order_history.image_one.save(new_picture_name,picture_copy)
 
 
             # iffiliate_money = get_amount_by_percent(10,order.total_amount)
