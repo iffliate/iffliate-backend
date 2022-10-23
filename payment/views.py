@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 from django.contrib.auth import get_user_model
 from authentication import models as auth_models
+from django.core.files.base import ContentFile
 from product import models as product_models
 # Create your views here.
 
@@ -91,12 +92,13 @@ def payment_webhook(request,pk=None):
             order.is_paid=True
             order.save()
             # user = get_user_model().objects.get(id=order.user.id)
+            # picture_copy  =ContentFile(eachitem.image.read())
             for eachitem in product_app_models.OrderItem.objects.filter(order=order.id):
                 shop_earnings = get_amount_by_percent(75,eachitem.product.actual_price*eachitem.quantity)
                 shop =auth_models.Shop.objects.get(id= eachitem.shop.id)
                 shop.wallet = shop.wallet +shop_earnings
                 shop.save()
-                product_models.OrderHistory.objects.create(
+                order_history =product_models.OrderHistory.objects.create(
                     shop =shop,
                     user = order.user,
                     buyer_first_name= order.user.first_name,
@@ -112,11 +114,12 @@ def payment_webhook(request,pk=None):
                     iffiliate_earning= get_amount_by_percent(25,eachitem.product.actual_price*eachitem.quantity),
                     shop_earning=shop_earnings,
 
-                    image_one=eachitem.image_one,
-                    image_two=eachitem.image_two,
-                    image_three=eachitem.image_three,
-                    image_four=eachitem.image_three
+                    # image_one=eachitem.image_one,
+                   
                 )
+                picture_copy  =ContentFile(eachitem.image_one.read())
+                new_picture_name = eachitem.image_one.name.split('/')[-1]
+                order_history.image_one.save(new_picture_name,picture_copy)
 
 
             # iffiliate_money = get_amount_by_percent(10,order.total_amount)
