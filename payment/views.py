@@ -130,7 +130,6 @@ def payment_webhook(request,pk=None):
 
 class InitOrderTran(APIView):
     authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
 
     def post(self, request,order_id=None):
