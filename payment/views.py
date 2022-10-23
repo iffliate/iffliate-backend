@@ -102,8 +102,8 @@ def payment_webhook(request,pk=None):
                     buyer_first_name= order.user.first_name,
                     buyer_last_name = order.user.last_name,
                     buyer_email=order.user.email,
-                    buyer_phone = order.user.phone,
-                    buyer_shipping_address = order.user.shipping_address,
+                    buyer_phone = meta_data['buyer_phone'],
+                    buyer_shipping_address = meta_data['shipping_addresse'],
                     amount = eachitem.product.actual_price,
                     paystack = order.paystack,
                     quantity = eachitem.quantity,
@@ -130,9 +130,16 @@ def payment_webhook(request,pk=None):
 
 class InitOrderTran(APIView):
     authentication_classes = [authentication.TokenAuthentication]
-
+    
 
     def post(self, request,order_id=None):
+        extra_data = request.data
+        buyer_phone = extra_data.get('phone',None)
+        shipping_addresse = extra_data.get('shipping_addresse',None)
+
+        if shipping_addresse is None:raise CustomError({'error':'please provide a shipping address'})
+        if buyer_phone is None:raise CustomError({'error':'please provide a Phone Number'})
+
         if not product_app_models.Order.objects.filter(id=order_id,).exists():
             raise CustomError(message='Order does not exists',status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -146,6 +153,8 @@ class InitOrderTran(APIView):
             meta_data={
                 'order_id':order.id,
                 'forWhat':'order_payment',
+                'buyer_phone':buyer_phone,
+                'shipping_addresse':shipping_addresse
             }
         )
         response = init.create_payment_link()
