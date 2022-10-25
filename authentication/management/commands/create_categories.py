@@ -11,7 +11,7 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
-        if models.Category.objects.count != 7:
+        if models.Category.objects.count() != 7:
             self.stdout.write('Creating Categories for the  application')
             for name in ['Grocery','Bakery','MakeUP','Bags','Clothing','Funiture','Book']:
                 models.Category.objects.create(
