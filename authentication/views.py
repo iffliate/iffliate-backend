@@ -1,3 +1,4 @@
+from authentication.filter import ShopFilter
 from product.permission import IsShopOwner
 from utils.custom_response import Success_response
 from rest_framework import status
@@ -15,6 +16,7 @@ class ShopCreate(ListCreateAPIView,RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     parser_classes = (NestedMultipartParser,FormParser,)
     queryset = Shop.objects.all()  
+    filterset_class=ShopFilter
     lookup_field = 'slug'
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
