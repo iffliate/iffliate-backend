@@ -2,10 +2,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status,viewsets,mixins
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
-from .serializer import (ProductSerializer, OrderSerializer,UserOrderCleanerSerializer,
+from .serializer import (CategorySerailizer, ProductSerializer, OrderSerializer,UserOrderCleanerSerializer,
 OrderHistoryCleanSerializer,OrderHistoryShopManageSerializer)
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from .models import Product, Order,OrderHistory
+from .models import Category, Product, Order,OrderHistory
 from .permission import UpdateOrDelete,IsShopOwner
 from utils.custom_response import CustomError, Success_response
 from rest_framework import status
@@ -13,6 +13,13 @@ from utils.custom_parsers import NestedMultipartParser
 from rest_framework.parsers import  FormParser
 from . import filter as custom_filters
 
+
+class CategoryView(ListCreateAPIView):
+    serializer_class = CategorySerailizer
+    queryset = Category.objects.all()  
+    def create(self, request, *args, **kwargs):
+        return
+        
 class ProductCreateView(ListCreateAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly,IsShopOwner]

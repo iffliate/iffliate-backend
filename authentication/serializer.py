@@ -11,7 +11,7 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = ['user',
         'id','name','slug','facebook','twitter','whatsapp','instagram','about','banner','logo','info',
         'account_holder_name','account_number','account_holder_email','bank_name','address_country','address_city',
-        'address_zip','street_address','created_at','updated_at','wallet'
+        'address_zip','street_address','created_at','updated_at','wallet','phone'
         ]
         
     def create(self, validated_data):
@@ -28,7 +28,7 @@ class ShopRelatedProduct(serializers.ModelSerializer):
         model = Shop
         fields = [ 
             'name','id','facebook','twitter','whatsapp','instagram',
-            'about','banner','logo','info','products','user'
+            'about','banner','logo','info','products','user','phone','address_country','address_city','street_address'
         ]
 
     def get_products(self,shop):
