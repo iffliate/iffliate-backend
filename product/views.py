@@ -1,16 +1,19 @@
+from ast import Delete
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status,viewsets,mixins
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
-from .serializer import (CategorySerailizer, ProductSerializer, OrderSerializer,UserOrderCleanerSerializer,
+from .serializer import (CategorySerailizer, OrderItemCleaner, ProductSerializer, OrderSerializer,UserOrderCleanerSerializer,
 OrderHistoryCleanSerializer,OrderHistoryShopManageSerializer)
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from .models import Category, Product, Order,OrderHistory
+from .models import Category, OrderItem, Product, Order,OrderHistory
 from .permission import UpdateOrDelete,IsShopOwner
 from utils.custom_response import CustomError, Success_response
 from rest_framework import status
 from utils.custom_parsers import NestedMultipartParser
 from rest_framework.parsers import  FormParser
+from django.shortcuts import get_object_or_404
+
 from . import filter as custom_filters
 
 
@@ -82,6 +85,22 @@ class OrderDetailView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     lookup_field = 'orderId'
     queryset = Order.objects.all()
+
+
+    def destroy(self, request, *args, **kwargs):
+        orderitem_id = request.query_params.get('orderitem_id')
+        orderId = kwargs.get('orderId',None)
+        # if not Order.objects.filter(id=orderId).exists():
+        order  = get_object_or_404(Order,id=orderId)
+        if order.user != request.user:
+            CustomError({'error':'you dont have permission to delete this object'})
+        number,order_item = OrderItem.objects.filter(id=orderitem_id,order=orderId).delete()
+
+        if number==1:
+            'if number is one that means it deleted succefully'
+            serialized = OrderItemCleaner(order_item,many=True)
+            return Success_response('done',data={'orderId':orderId,'orderitem_id':orderitem_id},status_code=status.HTTP_200_OK)
+        return Success_response('Not Found',data=[],status_code=status.HTTP_404_NOT_FOUND)
     
         
     
