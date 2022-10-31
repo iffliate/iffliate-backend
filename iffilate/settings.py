@@ -173,8 +173,8 @@ DJOSER = {
     'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': white_list
 }
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME':timedelta(hours=24),
-    'REFRESH_TOKEN_LIFETIME':timedelta(hours=24),
+    'ACCESS_TOKEN_LIFETIME':timedelta(hours=72),
+    'REFRESH_TOKEN_LIFETIME':timedelta(hours=72),
     'ROTATE_REFRESH_TOKENS':False,
     'BLACKLIST_AFTER_ROTATION':False,
     'ALGORITH':'HS256',
@@ -239,10 +239,11 @@ CORS_ALLOW_HEADERS = [
 
 CSRF_TRUSTED_ORIGINS =CORS_ALLOWED_ORIGINS
 
+PAYSTACK_SECRET =  os.environ['PAYSTACK_SECRET'] 
+PAYSTACK_PUBLICKEY = os.environ['PAYSTACK_PUBLICKEY'] 
 
-
-PAYSTACK_SECRET=os.environ['PAYSTACK_SECRET']
-PAYSTACK_PUBLICKEY=os.environ['PAYSTACK_PUBLICKEY']
+# PAYSTACK_SECRET= config('PAYSTACK_SECRET')
+# PAYSTACK_PUBLICKEY=config('PAYSTACK_PUBLICKEY')
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # url https://stackoverflow.com/questions/61234135/whitenoise-storage-missingfileerror-the-file-ecommerce-fonts-icofont-eot

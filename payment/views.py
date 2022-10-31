@@ -13,6 +13,10 @@ from django.contrib.auth import get_user_model
 from authentication import models as auth_models
 from django.core.files.base import ContentFile
 from product import models as product_models
+from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
+from .models import Banks
+from .serializer import BankSerializer
 # Create your views here.
 
 
@@ -34,6 +38,69 @@ def very_payment(request,reference=None):
     if resp.json()['data']['status'] == 'success':
         return Success_response(msg="Recived the Request Succefully",)
     raise CustomError({"error":"Something Went Wrong Try Again"},status_code=status.HTTP_400_BAD_REQUEST)
+
+    
+    
+class View_Banks(GenericAPIView):
+    queryset = Banks.objects.all()
+    serializer_class = BankSerializer
+    def get(self, request):
+        bank = Banks.objects.all()
+        serializer = BankSerializer(bank, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+        
+
+class InitTransfer:
+    'this class handles the initializing of Transfers'
+    def __init__(self, amount):
+        self.amount = amount
+        self.url = 'https://api.paystack.co/transfer'
+        
+    'This method gets the lists of banks and then save in the db'    
+    
+    def get_list_of_banks(self):    
+        headers = {
+            'Authorization': 'Bearer '+settings.PAYSTACK_SECRET,
+            'Content-Type' : 'application/json',
+            'Accept': 'application/json'
+            }
+        url = 'https://api.paystack.co/bank'
+        try:
+            resp = requests.get(url, headers=headers)
+        except requests.ConnectionError:
+            raise CustomError({"error":"Network Error please try again in a few minutes"}, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+        if resp.status_code ==200:
+            data = resp.json()
+            bank_data = data["data"]
+            for bank in bank_data:
+                banks = Banks.objects.create(name=bank["name"], slug= bank["slug"], code = bank["code"], bank_type=bank["type"])
+            return banks
+        raise CustomError(message='Some Error Occured Please Try Again',status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+    
+        
+        
+    def initailizeTransfer(self):
+        headers = {
+            'Authorization': f'Bearer {settings.PAYSTACK_SECRET}',
+            'Content-Type' : 'application/json',
+            'Accept': 'application/json'}
+        body = {
+            'source':'balance',
+            'amount': convert_naira_to_kobo(self.amount),
+            'recipient':'',
+            'reason':'Withdrawal from Shop wallet' 
+        }
+        try:
+            resp = requests.post(self.url, headers=headers, data=json.dumps(body))
+        except requests.ConnectionError:
+            raise CustomError({"error":"Network Error please try again in a few minutes"}, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+        if resp.status_code ==200:
+            data = resp.json()
+            return data
+
+        raise CustomError(message='Some Error Occured Please Try Again',status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+   
 
 
 class InitPayment:
