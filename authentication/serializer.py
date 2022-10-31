@@ -7,7 +7,12 @@ from django.template.defaultfilters import slugify
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop
-        exclude = [ 'user']
+        # exclude = [ 'user']
+        fields = ['user',
+        'id','name','slug','facebook','twitter','whatsapp','instagram','about','banner','logo','info',
+        'account_holder_name','account_number','account_holder_email','bank_name','address_country','address_city',
+        'address_zip','street_address','created_at','updated_at','wallet','phone'
+        ]
         
     def create(self, validated_data):
         slug = slugify(validated_data["name"]+Shop.objects.count())
@@ -23,7 +28,7 @@ class ShopRelatedProduct(serializers.ModelSerializer):
         model = Shop
         fields = [ 
             'name','id','facebook','twitter','whatsapp','instagram',
-            'about','banner','logo','info','products'
+            'about','banner','logo','info','products','user','phone','address_country','address_city','street_address'
         ]
 
     def get_products(self,shop):

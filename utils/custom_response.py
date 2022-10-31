@@ -11,7 +11,7 @@ def Success_response(msg,data=None,status_code=status.HTTP_200_OK):
 
     return Response(data={
         **structure_responseDict(msg,status_code,success=True,data=data)
-    })
+    },status=status_code)
 
 
 def structure_responseDict(msg,status_code,success,data=None):

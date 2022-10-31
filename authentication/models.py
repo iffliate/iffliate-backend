@@ -72,6 +72,7 @@ class Shop(models.Model):
     account_number = models.CharField(max_length=255)
     account_holder_email = models.EmailField(max_length=255)
     bank_name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=255,default='090...')
     address_country = models.CharField(max_length=255)
     address_city = models.CharField(max_length=255)
     address_zip =models.CharField(max_length=255)

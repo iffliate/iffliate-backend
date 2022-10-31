@@ -181,7 +181,11 @@ class ProductSerializer(serializers.ModelSerializer):
         
         return request.user.id == current_shop.user.id
 
-
+class CategorySerailizer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = product_app_models.Category
+        fields = [ 'id','name']
 
 class OrderHistoryCleanSerializer(serializers.ModelSerializer):
 
