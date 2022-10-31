@@ -81,7 +81,7 @@ class Shop(models.Model):
     updated_at = models.DateTimeField(auto_now = True, null=True, blank=True)
     "each shop has their wallet "
     wallet = models.DecimalField(max_digits=10, decimal_places=2,default=0.00)
-    paystack_recipient = models.CharField(max_length=255, null=True)
+    
     
     def __str__(self):
             return self.name

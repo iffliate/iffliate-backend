@@ -173,8 +173,8 @@ DJOSER = {
     'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': white_list
 }
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME':timedelta(hours=72),
-    'REFRESH_TOKEN_LIFETIME':timedelta(hours=72),
+    'ACCESS_TOKEN_LIFETIME':timedelta(hours=96),
+    'REFRESH_TOKEN_LIFETIME':timedelta(hours=96),
     'ROTATE_REFRESH_TOKENS':False,
     'BLACKLIST_AFTER_ROTATION':False,
     'ALGORITH':'HS256',

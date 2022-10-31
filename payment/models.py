@@ -1,10 +1,10 @@
-from django.db import models
+# from django.db import models
 
-class Banks(models.Model):
-    name = models.CharField(max_length=255)
-    code = models.CharField(max_length=20)
-    bank_type = models.CharField(max_length=20)
-    slug = models.CharField(max_length=30)
+# class Banks(models.Model):
+#     name = models.CharField(max_length=255)
+#     code = models.CharField(max_length=20)
+#     bank_type = models.CharField(max_length=20)
+#     slug = models.CharField(max_length=30)
     
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
