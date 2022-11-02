@@ -13,9 +13,10 @@ class ShopSerializer(serializers.ModelSerializer):
         'account_holder_name','account_number','account_holder_email','bank_name','address_country','address_city',
         'address_zip','street_address','created_at','updated_at','wallet','phone'
         ]
+        extra_kwargs = {'user': {'read_only': True}}
         
     def create(self, validated_data):
-        slug = slugify(validated_data["name"]+Shop.objects.count())
+        slug = slugify(validated_data["name"]+str(Shop.objects.count()))
         return Shop.objects.create(slug=slug, **validated_data)
 
 
