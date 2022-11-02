@@ -82,6 +82,7 @@ class Shop(models.Model):
     "each shop has their wallet "
     wallet = models.DecimalField(max_digits=10, decimal_places=2,default=0.00)
     
+    
     def __str__(self):
             return self.name
       

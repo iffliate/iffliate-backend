@@ -1,3 +1,10 @@
-from django.db import models
+# from django.db import models
 
-# Create your models here.
+# class Banks(models.Model):
+#     name = models.CharField(max_length=255)
+#     code = models.CharField(max_length=20)
+#     bank_type = models.CharField(max_length=20)
+#     slug = models.CharField(max_length=30)
+    
+#     def __str__(self):
+#         return self.name

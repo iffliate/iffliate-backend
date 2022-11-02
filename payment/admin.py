@@ -1,5 +1,6 @@
 from django.contrib import admin
 from product import models
+from .models import Banks
 # Register your models here.
 
 
@@ -9,3 +10,4 @@ from product import models
 
 
 admin.site.register(models.OrderHistory)
+admin.site.register(Banks)

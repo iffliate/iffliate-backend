@@ -1,8 +1,5 @@
 
-
-
 from decimal import Decimal
-
 
 def convert_naira_to_kobo(naira):
     naira = float(naira)*100
