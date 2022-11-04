@@ -15,8 +15,8 @@ from django.core.files.base import ContentFile
 from product import models as product_models
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from .models import Banks
-from .serializer import BankSerializer
+# from .models import Banks
+# from .serializer import BankSerializer
 # Create your views here.
 
 

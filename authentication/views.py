@@ -10,7 +10,7 @@ from utils.custom_parsers import NestedMultipartParser
 from rest_framework.permissions import IsAuthenticated
 from .models import Shop
 from django.shortcuts import get_object_or_404
-from payment.models import Banks
+# from payment.models import Banks
 import requests, json
 from utils.custom_response import CustomError
 from django.conf import settings

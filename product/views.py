@@ -65,7 +65,7 @@ class OrderCreateView(ListCreateAPIView):
         'status'
     ]  
     def get(self,request):
-        queryset =Order.objects.all()
+        queryset =Order.objects.all().order_by('-id')
         serialized = UserOrderCleanerSerializer(self.filter_queryset(queryset),many=True,context={'request':request})
         return Success_response(msg="Success",data=serialized.data,status_code =status.HTTP_200_OK)
 
