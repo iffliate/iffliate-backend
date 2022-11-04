@@ -1,4 +1,4 @@
-from http.client import HTTPResponse
+from django.http import HttpResponse
 from django.shortcuts import render
 import requests,json
 from utils.extraFunc import convert_naira_to_kobo,get_amount_by_percent
@@ -154,36 +154,37 @@ def payment_webhook(request,pk=None):
                 based on the 75% we credit the shop wallet
             '''
             order_id  = meta_data['order_id']
-
             order = product_app_models.Order.objects.get(id=order_id)
-            order.is_paid=True
-            order.save()
-            # user = get_user_model().objects.get(id=order.user.id)
-            # picture_copy  =ContentFile(eachitem.image.read())
-            for eachitem in product_app_models.OrderItem.objects.filter(order=order.id):
-                shop_earnings = get_amount_by_percent(75,eachitem.product.actual_price*eachitem.quantity)
-                shop =auth_models.Shop.objects.get(id= eachitem.shop.id)
-                shop.wallet = shop.wallet +shop_earnings
-                shop.save()
-                order_history =product_models.OrderHistory.objects.create(
-                    shop =shop,
-                    user = order.user,
-                    buyer_first_name= order.user.first_name,
-                    buyer_last_name = order.user.last_name,
-                    buyer_email=order.user.email,
-                    buyer_phone = meta_data['buyer_phone'],
-                    buyer_shipping_address = meta_data['shipping_addresse'],
-                    amount = eachitem.product.actual_price,
-                    paystack = order.paystack,
-                    quantity = eachitem.quantity,
-                    product_name=eachitem.product.name,
-                    description=eachitem.product.description,
-                    iffiliate_earning= get_amount_by_percent(25,eachitem.product.actual_price*eachitem.quantity),
-                    shop_earning=shop_earnings,
+            if order.is_paid == False:
+                # i noticed paystack sends a hook again resulting to to many order
+                order.is_paid=True
+                order.save()
+                # user = get_user_model().objects.get(id=order.user.id)
+                # picture_copy  =ContentFile(eachitem.image.read())
+                for eachitem in product_app_models.OrderItem.objects.filter(order=order.id):
+                    shop_earnings = get_amount_by_percent(75,eachitem.product.actual_price*eachitem.quantity)
+                    shop =auth_models.Shop.objects.get(id= eachitem.shop.id)
+                    shop.wallet = shop.wallet +shop_earnings
+                    shop.save()
+                    order_history =product_models.OrderHistory.objects.create(
+                        shop =shop,
+                        user = order.user,
+                        buyer_first_name= order.user.first_name,
+                        buyer_last_name = order.user.last_name,
+                        buyer_email=order.user.email,
+                        buyer_phone = meta_data['buyer_phone'],
+                        buyer_shipping_address = meta_data['shipping_addresse'],
+                        amount = eachitem.product.actual_price,
+                        paystack = order.paystack,
+                        quantity = eachitem.quantity,
+                        product_name=eachitem.product.name,
+                        description=eachitem.product.description,
+                        iffiliate_earning= get_amount_by_percent(25,eachitem.product.actual_price*eachitem.quantity),
+                        shop_earning=shop_earnings,
 
-                    # image_one=eachitem.image_one,
-                   
-                )
+                        # image_one=eachitem.image_one,
+                    
+                    )
 
 
             # iffiliate_money = get_amount_by_percent(10,order.total_amount)
@@ -192,7 +193,7 @@ def payment_webhook(request,pk=None):
             #     'iffiliate_money':iffiliate_money,
             #     'shop_money':shop_money
             # })
-        return HTTPResponse(status.HTTP_200_OK)
+        return HttpResponse(status.HTTP_200_OK)
 
 
 class InitOrderTran(APIView):
