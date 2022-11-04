@@ -150,7 +150,7 @@ class ShopOrderManagement(mixins.ListModelMixin,mixins.UpdateModelMixin,mixins.R
     @action(detail=True,methods=['get'])
     def get_all_paystack_keys(self,request,pk=None):
         'we getting all the keys that will be represented as payment id for the shop'
-        paystack_keys = OrderHistory.objects.filter(shop=pk).values('paystack').distinct()
+        paystack_keys = OrderHistory.objects.filter(shop=pk).order_by('-id').values_list('paystack', flat=True).distinct()
         return Success_response(msg="Success",data=paystack_keys,status_code =status.HTTP_200_OK)
 
 
