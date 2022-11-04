@@ -65,7 +65,7 @@ class OrderCreateView(ListCreateAPIView):
         'status'
     ]  
     def get(self,request):
-        queryset =Order.objects.all().order_by('-id')
+        queryset =Order.objects.all()
         serialized = UserOrderCleanerSerializer(self.filter_queryset(queryset),many=True,context={'request':request})
         return Success_response(msg="Success",data=serialized.data,status_code =status.HTTP_200_OK)
 
@@ -126,9 +126,9 @@ class UserOrderManagemnt(mixins.ListModelMixin,mixins.RetrieveModelMixin,viewset
     def get_all_paystack_keys(self,request,pk=None):
         'we getting all the keys that will be represented as payment id'
 
-        paystack_keys = OrderHistory.objects.filter(user=request.user.id).values('paystack').distinct()
+        paystack_keys = OrderHistory.objects.filter(user=request.user.id).order_by('-id').values_list('paystack', flat=True).distinct()
 
-        return Success_response(msg="Success",data=paystack_keys,status_code =status.HTTP_200_OK)
+        return Success_response(msg="Success",data=list(set(paystack_keys)),status_code =status.HTTP_200_OK)
 
 
     def retrieve(self, request, *args, **kwargs):
