@@ -125,8 +125,8 @@ class UserOrderManagemnt(mixins.ListModelMixin,mixins.RetrieveModelMixin,viewset
     @action(detail=False,methods=['get'])
     def get_all_paystack_keys(self,request,pk=None):
         'we getting all the keys that will be represented as payment id'
-
-        paystack_keys = OrderHistory.objects.filter(user=request.user.id).order_by('-id').values_list('paystack', flat=True).distinct()
+        queryset =self.filter_queryset(self.queryset)
+        paystack_keys = queryset.filter(user=request.user.id).order_by('-id').values_list('paystack', flat=True).distinct()
 
         return Success_response(msg="Success",data=list(set(paystack_keys)),status_code =status.HTTP_200_OK)
 
@@ -150,8 +150,9 @@ class ShopOrderManagement(mixins.ListModelMixin,mixins.UpdateModelMixin,mixins.R
     @action(detail=True,methods=['get'])
     def get_all_paystack_keys(self,request,pk=None):
         'we getting all the keys that will be represented as payment id for the shop'
-        paystack_keys = OrderHistory.objects.filter(shop=pk).order_by('-id').values_list('paystack', flat=True).distinct()
-        return Success_response(msg="Success",data=paystack_keys,status_code =status.HTTP_200_OK)
+        queryset =self.filter_queryset(self.queryset)
+        paystack_keys = queryset.filter(shop=pk).order_by('-id').values_list('paystack', flat=True).distinct()
+        return Success_response(msg="Success",data=list(set(paystack_keys)),status_code =status.HTTP_200_OK)
 
 
 
