@@ -15,6 +15,11 @@ from django.core.files.base import ContentFile
 from product import models as product_models
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework import viewsets
+from . import serializer
+from authentication.models import Shop
+from product.permission import IsShopOwner
+from .models import ShopWithdrawHistory
 # from .models import Banks
 # from .serializer import BankSerializer
 # Create your views here.
@@ -41,66 +46,7 @@ def very_payment(request,reference=None):
 
     
     
-# class View_Banks(GenericAPIView):
-#     queryset = Banks.objects.all()
-#     serializer_class = BankSerializer
-#     def get(self, request):
-#         bank = Banks.objects.all()
-#         serializer = BankSerializer(bank, many=True)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-    
-        
 
-# class InitTransfer:
-#     'this class handles the initializing of Transfers'
-#     def __init__(self, amount):
-#         self.amount = amount
-#         self.url = 'https://api.paystack.co/transfer'
-        
-#     'This method gets the lists of banks and then save in the db'    
-    
-#     def get_list_of_banks(self):    
-#         headers = {
-#             'Authorization': 'Bearer '+settings.PAYSTACK_SECRET,
-#             'Content-Type' : 'application/json',
-#             'Accept': 'application/json'
-#             }
-#         url = 'https://api.paystack.co/bank'
-#         try:
-#             resp = requests.get(url, headers=headers)
-#         except requests.ConnectionError:
-#             raise CustomError({"error":"Network Error please try again in a few minutes"}, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
-#         if resp.status_code ==200:
-#             data = resp.json()
-#             bank_data = data["data"]
-#             for bank in bank_data:
-#                 banks = Banks.objects.create(name=bank["name"], slug= bank["slug"], code = bank["code"], bank_type=bank["type"])
-#             return banks
-#         raise CustomError(message='Some Error Occured Please Try Again',status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
-    
-        
-        
-    # def initailizeTransfer(self):
-    #     headers = {
-    #         'Authorization': f'Bearer {settings.PAYSTACK_SECRET}',
-    #         'Content-Type' : 'application/json',
-    #         'Accept': 'application/json'}
-    #     body = {
-    #         'source':'balance',
-    #         'amount': convert_naira_to_kobo(self.amount),
-    #         'recipient':'',
-    #         'reason':'Withdrawal from Shop wallet' 
-    #     }
-    #     try:
-    #         resp = requests.post(self.url, headers=headers, data=json.dumps(body))
-    #     except requests.ConnectionError:
-    #         raise CustomError({"error":"Network Error please try again in a few minutes"}, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
-    #     if resp.status_code ==200:
-    #         data = resp.json()
-    #         return data
-
-    #     raise CustomError(message='Some Error Occured Please Try Again',status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
-   
 
 
 class InitPayment:
@@ -140,9 +86,10 @@ def payment_webhook(request,pk=None):
     "this receives Payload from paystack"
     # data = json.loads(request.body)
     data = json.loads(request.body)
-    meta_data =data['data']['metadata']
+    
 
     if data.get('event') == 'charge.success':
+        meta_data =data['data']['metadata']
         "this means the payment was a success"
         if meta_data['forWhat'] =='order_payment':
             '''
@@ -187,13 +134,29 @@ def payment_webhook(request,pk=None):
                     )
 
 
-            # iffiliate_money = get_amount_by_percent(10,order.total_amount)
-            # shop_money = get_amount_by_percent(90,order.total_amount)
-            # print({
-            #     'iffiliate_money':iffiliate_money,
-            #     'shop_money':shop_money
-            # })
-        return HttpResponse(status.HTTP_200_OK)
+    if data.get('event') == 'transfer.success':
+        recipient_code = data['data']['recipient']['recipient_code']
+        shop_widthraw = ShopWithdrawHistory.objects.filter(recipient_code=recipient_code).first()
+        shop_widthraw.transfer_state='success'
+        shop_widthraw.save()
+
+        'since it succefful we need to reduce the wallet'
+        shop = Shop.objects.get(id=shop_widthraw.shop.id)
+        shop.wallet = shop.wallet - shop_widthraw.amount
+        shop.save()
+    if data.get('event') == 'transfer.failed':
+        recipient_code = data['data']['recipient']['recipient_code']
+        shop_widthraw = ShopWithdrawHistory.objects.filter(recipient_code=recipient_code).first()
+        shop_widthraw.transfer_state='failed'
+        shop_widthraw.save()
+    if data.get('event') == 'transfer.reversed':
+        shop_widthraw = ShopWithdrawHistory.objects.filter(recipient_code=recipient_code).first()
+        shop_widthraw.transfer_state='reversed'
+        shop_widthraw.save()
+
+    return HttpResponse(status.HTTP_200_OK)
+
+
 
 
 class InitOrderTran(APIView):
@@ -231,4 +194,32 @@ class InitOrderTran(APIView):
         
         
         return Success_response(msg="Created",data=response,status_code =status.HTTP_201_CREATED)
+
+
+
+
+
+
+
+
+
+
+
+
+
+class HandleShopPaymentView(viewsets.ViewSet):
+    
+    serializer_class =serializer.HandleShopPaymentView
+    permission_classes = [ IsShopOwner]
+
+    def create(self, request):
+        'this is what handles the users payment'
+        serialized = self.serializer_class(data=request.data,many=False)
+        serialized.is_valid(raise_exception=True)
+
+        serialized.save()
+
+        return Success_response('Workign on it',data=[],)
+
+
 
