@@ -4,6 +4,7 @@ import requests,json
 from utils.extraFunc import convert_naira_to_kobo,get_amount_by_percent
 from utils.custom_response import CustomError, Success_response
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import status,authentication,permissions
 from product import models as product_app_models
@@ -20,6 +21,8 @@ from . import serializer
 from authentication.models import Shop
 from product.permission import IsShopOwner
 from .models import ShopWithdrawHistory
+from rest_framework.decorators import action
+from rest_framework.authentication import TokenAuthentication
 # from .models import Banks
 # from .serializer import BankSerializer
 # Create your views here.
@@ -211,8 +214,13 @@ class HandleShopPaymentView(viewsets.ViewSet):
     
     serializer_class =serializer.HandleShopPaymentView
     permission_classes = [ IsShopOwner]
+    authentication_classes = [authentication.TokenAuthentication]
+    queryset = Shop.objects.all()
 
     def create(self, request):
+        shop_id = request.data.get('shop_id',-0)
+        shop = self.verfy(id =shop_id)
+
         'this is what handles the users payment'
         serialized = self.serializer_class(data=request.data,many=False)
         serialized.is_valid(raise_exception=True)
@@ -220,6 +228,17 @@ class HandleShopPaymentView(viewsets.ViewSet):
         serialized.save()
 
         return Success_response('Workign on it',data=[],)
+
+    def verfy(self,id,):
+        shop = get_object_or_404(Shop,id=id)
+        if shop.user.id == self.request.user.id:
+            return shop
+        else: raise CustomError({'shop_id':'Not Found'})
+
+    @action(methods=['get'],detail=True,url_path='get_wallet')
+    def get_wallet(self,request,*args,**Kwargs):
+        shop = self.verfy(id = Kwargs['pk'])
+        return Success_response('Your Wallet Info',data={'wallet':shop.wallet})
 
 
 
