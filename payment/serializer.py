@@ -53,7 +53,7 @@ class HandleShopPaymentView(serializers.Serializer):
             'the bank info is good we need to start the process fast'
             recipient_code = test_bank.get('data').get('recipient_code')
             shop = Shop.objects.get(id=shop_id)
-            shopwithdraw,created = ShopWithdrawHistory.objects.get_or_create(recipient_code=recipient_code,)
+            shopwithdraw,created = ShopWithdrawHistory.objects.get_or_create(recipient_code=recipient_code,shop=shop)
             if created == False and shopwithdraw.transfer_state == 'pending':
                 raise CustomError({'shop_id':'We are still processing your withdrawal'})
             else:
