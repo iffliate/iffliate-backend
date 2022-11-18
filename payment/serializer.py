@@ -76,8 +76,15 @@ class HandleShopPaymentView(serializers.Serializer):
     
 
 class HandleShopPaymentCleaner(serializers.ModelSerializer):
+    shop = serializers.SerializerMethodField()
 
+    def get_shop(self,obj):
+        shop =Shop.objects.get(id=obj.shop.id)
+        return {
+            'name':shop.name,
+            'id':shop.id
+        }
 
     class Meta:
         model =ShopWithdrawHistory
-        fields = [ 'shop__name','amount','transfer_state','created_at']
+        fields = [ 'shop','amount','transfer_state','created_at']
