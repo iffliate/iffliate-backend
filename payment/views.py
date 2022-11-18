@@ -218,12 +218,15 @@ class HandleShopPaymentView(viewsets.ViewSet):
     queryset = Shop.objects.all()
 
     def list(self,request,*args,**kwargs):
-        shop_id = request.data.get('shop_id',-0)
+
+        shop_id = request.query_params.get('shop_id',-0)
+        print({'shop_id':shop_id})
         shop = self.verfy(id =shop_id)
         withdraw_history = ShopWithdrawHistory.objects.filter(shop=shop)
-        # clean_data = 
+        clean_data = serializer.HandleShopPaymentCleaner(withdraw_history,many=True)
 
 
+        return Success_response('Success',data=clean_data.data,)
 
     def create(self, request):
         shop_id = request.data.get('shop_id',-0)
