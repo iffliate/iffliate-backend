@@ -138,7 +138,8 @@ def payment_webhook(request,pk=None):
 
     if data.get('event') == 'transfer.success':
         recipient_code = data['data']['recipient']['recipient_code']
-        shop_widthraw = ShopWithdrawHistory.objects.filter(recipient_code=recipient_code).first()
+        'get the reciept code that is still pending and change it to true .... fun fact if it pending the person cant request for payment'
+        shop_widthraw = ShopWithdrawHistory.objects.filter(recipient_code=recipient_code,transfer_state='pending').first()
         shop_widthraw.transfer_state='success'
         shop_widthraw.save()
 
@@ -148,11 +149,11 @@ def payment_webhook(request,pk=None):
         shop.save()
     if data.get('event') == 'transfer.failed':
         recipient_code = data['data']['recipient']['recipient_code']
-        shop_widthraw = ShopWithdrawHistory.objects.filter(recipient_code=recipient_code).first()
+        shop_widthraw = ShopWithdrawHistory.objects.filter(recipient_code=recipient_code,transfer_state='pending').first()
         shop_widthraw.transfer_state='failed'
         shop_widthraw.save()
     if data.get('event') == 'transfer.reversed':
-        shop_widthraw = ShopWithdrawHistory.objects.filter(recipient_code=recipient_code).first()
+        shop_widthraw = ShopWithdrawHistory.objects.filter(recipient_code=recipient_code,transfer_state='pending').first()
         shop_widthraw.transfer_state='reversed'
         shop_widthraw.save()
 
