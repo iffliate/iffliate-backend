@@ -21,7 +21,7 @@ class HandleShopPaymentView(serializers.Serializer):
     bank_name = serializers.CharField()
     account_number = serializers.CharField()
     shop_id = serializers.IntegerField()
-    amount = serializers.DecimalField(max_digits=5, decimal_places=2)
+    amount = serializers.DecimalField(max_digits=20, decimal_places=2)
 
 
     def validate(self, attrs):
