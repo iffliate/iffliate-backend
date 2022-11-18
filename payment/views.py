@@ -22,7 +22,6 @@ from authentication.models import Shop
 from product.permission import IsShopOwner
 from .models import ShopWithdrawHistory
 from rest_framework.decorators import action
-from rest_framework.authentication import TokenAuthentication
 # from .models import Banks
 # from .serializer import BankSerializer
 # Create your views here.
@@ -163,7 +162,6 @@ def payment_webhook(request,pk=None):
 
 
 class InitOrderTran(APIView):
-    authentication_classes = [authentication.TokenAuthentication]
     
 
     def post(self, request,order_id=None):
@@ -213,14 +211,12 @@ class InitOrderTran(APIView):
 class HandleShopPaymentView(viewsets.ViewSet):
     
     serializer_class =serializer.HandleShopPaymentView
-    permission_classes = [ IsShopOwner]
-    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [ permissions.IsAuthenticated,IsShopOwner]
     queryset = Shop.objects.all()
 
     def list(self,request,*args,**kwargs):
 
         shop_id = request.query_params.get('shop_id',-0)
-        print({'shop_id':shop_id})
         shop = self.verfy(id =shop_id)
         withdraw_history = ShopWithdrawHistory.objects.filter(shop=shop)
         clean_data = serializer.HandleShopPaymentCleaner(withdraw_history,many=True)
@@ -242,7 +238,9 @@ class HandleShopPaymentView(viewsets.ViewSet):
 
     def verfy(self,id,):
         shop = get_object_or_404(Shop,id=id)
+        print(shop.user.id ,self.request.user.id)
         if shop.user.id == self.request.user.id:
+            print('works')
             return shop
         else: raise CustomError({'shop_id':'Not Found'})
 
