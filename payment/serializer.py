@@ -75,3 +75,9 @@ class HandleShopPaymentView(serializers.Serializer):
 
     
 
+class HandleShopPaymentCleaner(serializers.ModelSerializer):
+
+
+    class Meta:
+        model =ShopWithdrawHistory
+        fields = [ 'shop__name','amount','transfer_state','created_at']

@@ -217,6 +217,14 @@ class HandleShopPaymentView(viewsets.ViewSet):
     authentication_classes = [authentication.TokenAuthentication]
     queryset = Shop.objects.all()
 
+    def list(self,request,*args,**kwargs):
+        shop_id = request.data.get('shop_id',-0)
+        shop = self.verfy(id =shop_id)
+        withdraw_history = ShopWithdrawHistory.objects.filter(shop=shop)
+        # clean_data = 
+
+
+
     def create(self, request):
         shop_id = request.data.get('shop_id',-0)
         shop = self.verfy(id =shop_id)

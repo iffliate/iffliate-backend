@@ -28,5 +28,6 @@ class ShopWithdrawHistory(models.Model):
     )
     transfer_state = models.CharField(choices=transfer_state_choice,max_length=15,default='pending')
 
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     # def __str__(self) -> str:return f'{self.transfer_state} {self.shop.name}'
