@@ -2,6 +2,7 @@ from ast import Delete
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status,viewsets,mixins
+from rest_framework.generics import GenericAPIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView
 from .serializer import (CategorySerailizer, OrderItemCleaner, ProductSerializer, OrderSerializer,UserOrderCleanerSerializer,
 OrderHistoryCleanSerializer,OrderHistoryShopManageSerializer)
@@ -13,7 +14,7 @@ from rest_framework import status
 from utils.custom_parsers import NestedMultipartParser
 from rest_framework.parsers import  FormParser
 from django.shortcuts import get_object_or_404
-
+from rest_framework.decorators import action
 from . import filter as custom_filters
 
 
@@ -23,7 +24,10 @@ class CategoryView(ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         return
         
-class ProductCreateView(ListCreateAPIView):
+class ProductCreateView(mixins.ListModelMixin,
+                        mixins.UpdateModelMixin,
+                        mixins.CreateModelMixin,
+                        GenericAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly,IsShopOwner]
     queryset = Product.objects.all()
@@ -50,6 +54,10 @@ class ProductCreateView(ListCreateAPIView):
 
         clean_data  = self.serializer_class(Instance,many=False)
         return Success_response(msg="Created",data=clean_data.data,status_code=status.HTTP_201_CREATED)
+
+
+
+
 
 class OrderCreateView(ListCreateAPIView):
     serializer_class = OrderSerializer
@@ -107,12 +115,19 @@ class OrderDetailView(RetrieveUpdateDestroyAPIView):
     
 class ProductDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
-    permission_classes = [UpdateOrDelete]
+    permission_classes = [UpdateOrDelete,IsShopOwner]
     lookup_field = 'slug'
+    parser_classes = (NestedMultipartParser,FormParser,)
     queryset = Product.objects.filter(out_of_stock = False)
             
 
-
+    def patch(self,request,*args,**kwargs):
+        product = get_object_or_404(Product,slug=kwargs.get('slug',None))
+        serializer = self.serializer_class(instance=product,data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
 
 
 class UserOrderManagemnt(mixins.ListModelMixin,mixins.RetrieveModelMixin,viewsets.GenericViewSet):

@@ -20,7 +20,9 @@ class ShopSerializer(serializers.ModelSerializer):
         return Shop.objects.create(slug=slug, **validated_data)
 
 
-
+    # def update(self, instance, validated_data):
+    #     print(validated_data)
+    #     return dict()
 class ShopRelatedProduct(serializers.ModelSerializer):
     products = serializers.SerializerMethodField()
 

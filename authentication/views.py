@@ -35,12 +35,20 @@ class ShopUpdate(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated,IsShopOwner]
     lookup_field = 'slug'
     queryset = Shop.objects.all()
-    def patch(self, request):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
+    def patch(self, request,slug=None):
+        shop = get_object_or_404(Shop,slug=slug)
+
+        print({
+            "Logged in user ":shop.user,
+            'shop owner': request.user
+        })
+        if shop.user.id != request.user.id:raise CustomError({'error':'You dont own this shop'})
+        serializer = self.serializer_class(instance=shop,data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, *args, **kwargs):
         shop = get_object_or_404(Shop,slug=kwargs.get('slug',None))
