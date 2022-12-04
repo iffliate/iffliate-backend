@@ -31,7 +31,8 @@ class ShopRelatedProduct(serializers.ModelSerializer):
         model = Shop
         fields = [ 
             'name','id','facebook','twitter','whatsapp','instagram',
-            'about','banner','logo','info','products','user','phone','address_country','address_city','street_address'
+            'about','banner','logo','info','products','user','phone','address_country','address_city','street_address',
+            'address_zip'
         ]
 
     def get_products(self,shop):
