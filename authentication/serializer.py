@@ -11,7 +11,7 @@ class ShopSerializer(serializers.ModelSerializer):
         fields = ['user',
         'id','name','slug','facebook','twitter','whatsapp','instagram','about','banner','logo','info',
         'account_holder_name','account_number','account_holder_email','bank_name','address_country','address_city',
-        'address_zip','street_address','created_at','updated_at','wallet','phone'
+        'address_zip','street_address','created_at','updated_at','wallet','phone','phone_number'
         ]
         extra_kwargs = {'user': {'read_only': True}}
         
@@ -32,7 +32,7 @@ class ShopRelatedProduct(serializers.ModelSerializer):
         fields = [ 
             'name','id','facebook','twitter','whatsapp','instagram',
             'about','banner','logo','info','products','user','phone','address_country','address_city','street_address',
-            'address_zip'
+            'address_zip','phone_number'
         ]
 
     def get_products(self,shop):
