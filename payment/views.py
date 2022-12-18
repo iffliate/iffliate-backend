@@ -130,7 +130,7 @@ def payment_webhook(request,pk=None):
                         description=eachitem.product.description,
                         iffiliate_earning= get_amount_by_percent(25,eachitem.product.actual_price*eachitem.quantity),
                         shop_earning=shop_earnings,
-
+                        shopPhone_number=shop.phone_number
                         # image_one=eachitem.image_one,
                     
                     )
