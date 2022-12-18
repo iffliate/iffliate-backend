@@ -81,6 +81,7 @@ class Shop(models.Model):
     updated_at = models.DateTimeField(auto_now = True, null=True, blank=True)
     "each shop has their wallet "
     wallet = models.DecimalField(max_digits=10, decimal_places=2,default=0.00)
+    phone_number = models.CharField(max_length=14,default='081')
     
     
     def __str__(self):

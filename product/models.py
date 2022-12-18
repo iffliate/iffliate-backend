@@ -116,6 +116,7 @@ class OrderHistory(models.Model):
         ('delivered', 'delivered',),
     )
     status = models.CharField(max_length=50, choices=status_choices, default='order_processing')
+    shopPhone_number = models.CharField(max_length=14,default='081')
 
     image_one = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
     image_two = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True, null=True)
