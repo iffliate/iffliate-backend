@@ -141,17 +141,17 @@ class UserOrderManagemnt(mixins.ListModelMixin,mixins.RetrieveModelMixin,viewset
     def get_all_paystack_keys(self,request,pk=None):
         'we getting all the keys that will be represented as payment id'
         queryset =self.filter_queryset(self.queryset)
-        paystack_keys = queryset.filter(user=request.user.id).order_by('-created_at','paystack').distinct('created_at','paystack').values('paystack','created_at',)
+        data  = queryset.filter(user=request.user.id).order_by('-created_at','paystack').distinct('created_at','paystack').values('paystack','created_at','id')
         # flat=True).distinct()
 
-        return Success_response(msg="Success",data=paystack_keys,status_code =status.HTTP_200_OK)
+        return Success_response(msg="Success",data=data,status_code =status.HTTP_200_OK)
 
 
     def retrieve(self, request, *args, **kwargs):
-        paystack_key = kwargs.get('pk',None)
-        if paystack_key is None:raise CustomError(message='look up field must not be None') 
+        id = kwargs.get('pk',None)
+        if id is None:raise CustomError(message='look up field must not be None') 
         
-        get_orders_info = self.filter_queryset(self.queryset.filter(paystack=paystack_key))
+        get_orders_info = self.filter_queryset(self.queryset.filter(id=id))
         clean_data = self.serializer_class(get_orders_info,many=True)
 
         return Success_response(msg="Success",data=clean_data.data,status_code =status.HTTP_200_OK)
@@ -167,17 +167,17 @@ class ShopOrderManagement(mixins.ListModelMixin,mixins.UpdateModelMixin,mixins.R
     def get_all_paystack_keys(self,request,pk=None):
         'we getting all the keys that will be represented as payment id for the shop'
         queryset =self.filter_queryset(self.queryset)
-        paystack_keys = queryset.filter(shop=pk).order_by('-id').values_list('paystack', flat=True).distinct()
-        return Success_response(msg="Success",data=list(set(paystack_keys)),status_code =status.HTTP_200_OK)
+        data  = queryset.filter(user=request.user.id).order_by('-created_at','paystack').distinct('created_at','paystack').values('paystack','created_at','id')
+        return Success_response(msg="Success",data=data,status_code =status.HTTP_200_OK)
 
 
 
     def retrieve(self, request, *args, **kwargs):
         'get all product that the users has bought from ur store'
-        paystack_key = kwargs.get('pk',None)
-        if paystack_key is None:raise CustomError(message='look up field must not be None') 
+        id = kwargs.get('pk',None)
+        if id is None:raise CustomError(message='look up field must not be None') 
         
-        get_orders_info = self.filter_queryset(self.queryset.filter(paystack=paystack_key))
+        get_orders_info = self.filter_queryset(self.queryset.filter(id=id))
         clean_data = self.serializer_class(get_orders_info,many=True)
 
         return Success_response(msg="Success",data=clean_data.data,status_code =status.HTTP_200_OK)
