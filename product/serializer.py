@@ -171,7 +171,7 @@ class ProductSerializer(serializers.ModelSerializer):
         else:
             slash_percentage = 0
             validated_data["slashed_price"] = validated_data["actual_price"]
-        category = product_app_models.Category.objects.get(validated_data['category'])
+        category = product_app_models.Category.objects.get(id=validated_data['category'].id)
         if category.name.lower() in ['bakery','food']:
             pass
         else:

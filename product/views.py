@@ -141,7 +141,7 @@ class UserOrderManagemnt(mixins.ListModelMixin,mixins.RetrieveModelMixin,viewset
     def get_all_paystack_keys(self,request,pk=None):
         'we getting all the keys that will be represented as payment id'
         queryset =self.filter_queryset(self.queryset)
-        paystack_keys = queryset.filter(user=request.user.id).order_by('-created_at','-id').distinct('paystack').values('paystack','created_at',)
+        paystack_keys = queryset.filter(user=request.user.id).order_by('-created_at','paystack').distinct('created_at','paystack').values('paystack','created_at',)
         # flat=True).distinct()
 
         return Success_response(msg="Success",data=list(set(paystack_keys)),status_code =status.HTTP_200_OK)
