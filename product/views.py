@@ -144,7 +144,7 @@ class UserOrderManagemnt(mixins.ListModelMixin,mixins.RetrieveModelMixin,viewset
         paystack_keys = queryset.filter(user=request.user.id).order_by('-created_at','paystack').distinct('created_at','paystack').values('paystack','created_at',)
         # flat=True).distinct()
 
-        return Success_response(msg="Success",data=list(set(paystack_keys)),status_code =status.HTTP_200_OK)
+        return Success_response(msg="Success",data=paystack_keys,status_code =status.HTTP_200_OK)
 
 
     def retrieve(self, request, *args, **kwargs):
