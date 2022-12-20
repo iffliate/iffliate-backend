@@ -171,6 +171,11 @@ class ProductSerializer(serializers.ModelSerializer):
         else:
             slash_percentage = 0
             validated_data["slashed_price"] = validated_data["actual_price"]
+        category = product_app_models.Category.objects.get(validated_data['category'])
+        if category.name.lower() in ['bakery','food']:
+            pass
+        else:
+            validated_data["actual_price"]  = validated_data["actual_price"]  + 3000
         product = product_app_models.Product.objects.create(slug=slug, slash_percentage=slash_percentage, **validated_data)
         # for image in images:
         #     Images.objects.create(product=product, **image) 
