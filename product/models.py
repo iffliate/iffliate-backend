@@ -91,7 +91,7 @@ class OrderItem(models.Model):
 class OrderHistory(models.Model):
     'this stores the orders that the user has bought with money successfully'
     # the  foreignKey is so the shop and user can access the info
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now_add=True)
     
     shop = models.ForeignKey(Shop,on_delete=models.SET_NULL,null=True)  
     user = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
