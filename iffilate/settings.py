@@ -18,7 +18,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ['localhost','web-production-a2ac.up.railway.app']
+ALLOWED_HOSTS = ['localhost','https://web-production-a2ac.up.railway.app']
 
 
 # Application definition
@@ -219,7 +219,9 @@ CORS_ALLOWED_ORIGINS = [
 'http://bucolic-travesseiro-b4154b.netlify.app',
 # backend
 "http://localhost:8000",
-'https://bucolic-travesseiro-b4154b.netlify.app'
+'https://bucolic-travesseiro-b4154b.netlify.app',
+'https://web-production-a2ac.up.railway.app',
+'http://web-production-a2ac.up.railway.app'
 ]
 
 CORS_ALLOW_METHODS = [
