@@ -32,6 +32,10 @@ class UserManager(BaseUserManager):
                 raise ValueError(_("Superuser should have is_admin as True"))
         
         user = self.create_user(email, password, **other_fields)
+        user.is_staff =True
+        user.is_admin =True
+        user.is_superuser =True
+        user.save(using=self._db)
         return user
     
 class User(AbstractBaseUser, PermissionsMixin):
