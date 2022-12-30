@@ -136,6 +136,14 @@ class UserOrderCleanerSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     # images = ImageSerializer(many=True)
+    shop_info = serializers.SerializerMethodField()
+
+    def get_shop_info(self,product:product_app_models.Product):
+
+        return {
+            'name':product.shop.name,
+            'id':product.shop.id,
+        }
     class Meta:
         model = product_app_models.Product
         fields = [
@@ -154,10 +162,10 @@ class ProductSerializer(serializers.ModelSerializer):
             'image_two',
             'image_three',
             'image_four',
-
+            'shop_info'
             
         ]
-        read_only_fields = ["slash_percentage", "slug",]
+        read_only_fields = ["slash_percentage", "slug",'shop_info']
     
     def create(self, validated_data):
         # images = validated_data.pop('images')

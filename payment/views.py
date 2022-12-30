@@ -94,14 +94,7 @@ def payment_webhook(request,pk=None):
         meta_data =data['data']['metadata']
         "this means the payment was a success"
         if meta_data['forWhat'] =='order_payment':
-            '''
-            we handle the order payment
-                get the amount paid
-                store all info we have in the OrderHistory -- done
-                iffiate get 25% -getting the percent from each OrderItem
-                the shop get 75%-getting the percent from each OrderItem
-                based on the 75% we credit the shop wallet
-            '''
+            
             order_id  = meta_data['order_id']
             order = product_app_models.Order.objects.get(id=order_id)
             if order.is_paid == False:
@@ -111,7 +104,9 @@ def payment_webhook(request,pk=None):
                 # user = get_user_model().objects.get(id=order.user.id)
                 # picture_copy  =ContentFile(eachitem.image.read())
                 for eachitem in product_app_models.OrderItem.objects.filter(order=order.id):
-                    shop_earnings = get_amount_by_percent(75,eachitem.product.actual_price*eachitem.quantity)
+                    # shop_earnings = get_amount_by_percent(75,eachitem.product.actual_price*eachitem.quantity)
+                    'we not removeing 75 percent again cus we adding 3000 on product creation'
+                    shop_earnings =eachitem.product.actual_price*eachitem.quantity
                     shop =auth_models.Shop.objects.get(id= eachitem.shop.id)
                     shop.wallet = shop.wallet +shop_earnings
                     shop.save()
