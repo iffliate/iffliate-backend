@@ -143,6 +143,7 @@ class ProductSerializer(serializers.ModelSerializer):
         return {
             'name':product.shop.name,
             'id':product.shop.id,
+            'slug':product.shop.slug
         }
     class Meta:
         model = product_app_models.Product
