@@ -8,6 +8,7 @@ from rest_framework import serializers
 from .utils import getUniqueId
 from django.template.defaultfilters import slugify
 from rest_framework import status
+from django.shortcuts import get_object_or_404
 class OrderItemsSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     quantity = serializers.IntegerField()
@@ -211,15 +212,22 @@ class OrderHistoryCleanSerializer(serializers.ModelSerializer):
 class OrderHistoryShopManageSerializer(serializers.Serializer):
     paystack =serializers.CharField()
     status = serializers.CharField()
+    shop_id=serializers.IntegerField()
 
     def validate(self, attrs):
         if not product_app_models.OrderHistory.objects.filter(paystack = attrs.get('paystack')).exists():
             raise CustomError({'error':'order historys does not exists'})
-        return super().validate(attrs)
 
+        return super().validate(attrs)
     def create(self, validated_data):
         paystack = validated_data.get('paystack')
         status = validated_data.get('status')
-        product_app_models.OrderHistory.objects.filter(paystack=paystack).update(status=status)
+        shop_id = validated_data.get('shop_id',-1)
+        shop = get_object_or_404(Shop,id=shop_id)
+
+        if shop.user.id != self.context.get('request').user.id:
+            raise CustomError({'error':'unauthorized'})
+
+        product_app_models.OrderHistory.objects.filter(paystack=paystack,shop=shop_id).update(status=status)
 
         return product_app_models.OrderHistory.objects.filter(paystack=paystack)

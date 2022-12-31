@@ -185,7 +185,7 @@ class ShopOrderManagement(mixins.ListModelMixin,mixins.UpdateModelMixin,mixins.R
     #     return super().update(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-        serilized = OrderHistoryShopManageSerializer(data=request.data)
+        serilized = OrderHistoryShopManageSerializer(data=request.data,context={'request':request})
         serilized.is_valid(raise_exception=True)
         data = serilized.save()
 
