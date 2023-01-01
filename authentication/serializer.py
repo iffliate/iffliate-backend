@@ -13,7 +13,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
             raise CustomError({'error':'email already exist'})
         return super().validate(attrs)
 
-    def create(self, validated_data):return super().create(validated_data)
+    def create(self, validated_data):
+        user  = User.objects.create_user(
+            email=validated_data.pop('email'),
+            password=validated_data.pop('password'),
+            **validated_data
+        )
+        return user
     class Meta:
         model = User
         fields = '__all__'
