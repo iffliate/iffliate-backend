@@ -1,9 +1,25 @@
 from venv import create
+from utils.custom_response import CustomError
 from rest_framework import serializers
-from .models import Shop
+from .models import Shop,User
 from product import models as product_models,serializer as product_serialzer
 from django.template.defaultfilters import slugify
 
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    
+    def validate(self, attrs):
+        if User.objects.filter(email=attrs.get('email')).exists():
+            raise CustomError({'error':'email already exist'})
+        return super().validate(attrs)
+
+    def create(self, validated_data):return super().create(validated_data)
+    class Meta:
+        model = User
+        fields = '__all__'
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 class ShopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop

@@ -176,7 +176,11 @@ DJOSER = {
     'USERNAME_RESET_CONFIRM_URL':'/username/reset/confirm/{uid}/{token}',
     'PASSWORD_RESET_CONFIRM_RETYPE':True,
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND':True,
-    'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': white_list
+    'SOCIAL_AUTH_ALLOWED_REDIRECT_URIS': white_list,
+    'SERIALIZERS':{
+        'user_create':'authentication.serializer.UserCreateSerializer'
+    }
+    # user_create
 }
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME':timedelta(hours=96),
