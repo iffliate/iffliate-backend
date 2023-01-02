@@ -105,9 +105,10 @@ def payment_webhook(request,pk=None):
                 # picture_copy  =ContentFile(eachitem.image.read())
                 for eachitem in product_app_models.OrderItem.objects.filter(order=order.id):
                     # shop_earnings = get_amount_by_percent(75,eachitem.product.actual_price*eachitem.quantity)
-                    'we not removeing 75 percent again cus we adding 3000 on product creation'
+                    'we producy we adding 3000 on product creation'
                     shop_earnings =eachitem.product.actual_price*eachitem.quantity
                     shop =auth_models.Shop.objects.get(id= eachitem.shop.id)
+                    shop_earnings = shop_earnings - 3000
                     shop.wallet = shop.wallet +shop_earnings
                     shop.save()
                     order_history =product_models.OrderHistory.objects.create(
